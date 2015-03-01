@@ -16,10 +16,10 @@ local bases = {
 }
 
 local baseRunners = {
-	{active = true, distanceAlongBaseline = 20},
-	{active = false, distanceAlongBaseline = 20},
-	{active = false, distanceAlongBaseline = 20},
-	{active = false, distanceAlongBaseline = 20}
+	{active = true, totalDistance = 0},
+	{active = false, totalDistance = 20},
+	{active = false, totalDistance = 20},
+	{active = false, totalDistance = 20}
 }
 
 
@@ -72,7 +72,7 @@ end
 
 function tick()
 	if not paused then
-		
+		-- baseRunners[1].totalDistance = baseRunners[1].totalDistance + 1
 	end
 end
 
@@ -106,7 +106,7 @@ function drawWorld()
 	love.graphics.setColor(100, 200, 200)
 	for i,v in ipairs(baseRunners) do
 		if v.active then
-			local newX, newY = getPositionFromDistanceAlongBaseline(v.distanceAlongBaseline)
+			local newX, newY = getPositionFromTotalDistance(v.totalDistance)
 			love.graphics.rectangle('fill', newX, newY, runnerSize, runnerSize)
 		end
 	end
@@ -126,12 +126,29 @@ function love.keypressed(key)
 
 end
 
-function getPositionFromDistanceAlongBaseline(dist)
+function getPositionFromTotalDistance(dist)
 	local pos = vector(0, 0)
 
 	if dist >= 0 and dist < 90 then
-		pos.x = 10
-		pos.y = 20
+		percentDist = (dist % 90) / 90
+		pos.x = bases[4].x + percentDist * (bases[1].x - bases[4].x)
+		pos.y = bases[4].y + percentDist * (bases[1].y - bases[4].y)
+	elseif dist >= 90 and dist < 180 then
+		percentDist = (dist % 90) / 90
+		pos.x = bases[1].x - percentDist * math.abs(bases[1].x - bases[2].x)
+		pos.y = bases[1].y - percentDist * math.abs(bases[1].y - bases[2].y)
+		print(pos)
+	elseif dist >= 180 and dist < 270 then
+		percentDist = (dist % 90) / 90
+		pos.x = bases[2].x - percentDist * math.abs(bases[3].x - bases[2].x)
+		pos.y = bases[2].y + percentDist * math.abs(bases[3].y - bases[2].y)
+	elseif dist >= 270 and dist <= 360 then
+		percentDist = (dist % 90) / 90
+		pos.x = bases[3].x + percentDist * math.abs(bases[4].x - bases[3].x)
+		pos.y = bases[3].y + percentDist * math.abs(bases[4].y - bases[3].y)
+	else
+		pos.x = bases[4].x
+		pos.y = bases[4].y
 	end
 
 	return pos.x, pos.y
